@@ -3,8 +3,10 @@
 #include <fstream>
 #include <string>
 #include <limits>
+#include <chrono>
 
 using namespace std;
+typedef chrono::high_resolution_clock Clock;
 
 class CoinSolution{
     public:
@@ -44,17 +46,20 @@ class CoinSolution{
 
 void CalculateBottomUp(int *, int, int*, int);
 void copyArrayValues(int* from, int* to, int length);
+CoinSolution calculateMemo(int problem, CoinSolution * solved, int * coinDenominations,
+	int coinDenominationsLength);
 
 int main(int argc, char** argv) {
     if(argc < 2) {
         cout << "Ya done messed up" << endl;
+        return 0;
     }
     string filename(argv[1]);
-    ifstream infile(filename);
+    ifstream infile(argv[1], ifstream::in);
     if(infile.is_open()) {
         string number; 
         getline(infile, number);
-        int numberOfCoinDenominations = stoi(number);
+        int numberOfCoinDenominations = stoi(number, nullptr);
         int *denominations = new int[numberOfCoinDenominations];
         for(int i = 0; i < numberOfCoinDenominations; i++) {
             getline(infile, number);
@@ -162,7 +167,15 @@ CoinSolution calculateRecursion(int problem, int * coinDenominations,
 }
 
 void copyArrayValues(int* from, int* to, int length) {
+    to = new int[length];
     for(int i = 0; i < length; i++) {
         to[i] = from[i];
     }
+}
+
+void outputToCSV(int coinValue, long time, string algorithmType) {
+    ofstream outputFile;
+    outputFile.open("data.csv", ofstream::app);
+    outputFile << "Made change for " << coinValue << " in with " << algorithmType;
+    outputFile.close();
 }
