@@ -9,21 +9,36 @@ class CoinSolution{
     public:
         CoinSolution() {
             totalCoins = 0;    
+            value = 0;
+            numberOfTypes = 0;
         }
 
 	    CoinSolution(int numberOfTypes) {
 			coinTypes = new int[numberOfTypes];
             fill_n(coinTypes, numberOfTypes, 0);
-			totalCoins = 0; 
+			totalCoins = 0;
+
 		}
         
         void InitCoinTypes(int numberOfTypes) {
             coinTypes = new int[numberOfTypes];
             fill_n(coinTypes, numberOfTypes, 0);
         }
-
+        
+        printCoinSolution(int [] denominationValues) {
+            cout << value << " cents =";
+            for(int i = 0; i < numberOfTypes; i++) {
+                if(coinTypes[i] < 0) {
+                    cout << denominationValues[i] << ":" << coinTypes[i] << " ";
+                }
+            }
+            cout << endl;
+        }
+        
+        int numberOfTypes;
         int* coinTypes;
 	    int totalCoins;
+        int value;
 }
 
 int main(int argc, char** argv) {
@@ -66,7 +81,7 @@ int CalculateBottomUp(int[] coinProblems, int coinProblemsLength,
     solvedProblems[0].totalCoins = 0;
     // zero
     for(int i = 1; i < maxCoinProblem; i++) {
-        int optimalLast = 100000;
+        int optimalLast = 1000000;
         int coinType;
         for(int j = 0; j < coinDenominationsLength; j++) {
             if(i - coinDenominations[j] >= 0) {
