@@ -1,5 +1,7 @@
 #include <iostream>
 #include <algorithm>
+#include <fstream>
+#include <string>
 
 using namespace std;
 
@@ -24,8 +26,32 @@ class CoinSolution{
 	    int totalCoins;
 }
 
-int main() {
-
+int main(int argc, char** argv) {
+    if(agc < 2) {
+        cout << "Ya done messed up" << endl;
+    }
+    string filename = new string(argv[1]);
+    ifstream infile(filename);
+    if(infile.is_open()) {
+        string number; 
+        getline(infile, number);
+        int numberOfCoinDenominations = stoi(number);
+        int denominations[numberOfCoinDenominations];
+        for(int i = 0; i < numberOfCoinDenomintations; i++) {
+            getline(infile, number);
+            denominationsp[i] = stoi(number);
+        }   
+        getline(infile, number);
+        int numberOfProblems = stoi(number);
+        int problems[numberOfProblems];
+        for(int i = 0; i < numberOfProblems; i++) {
+            getline(infile, number);
+            problems[i] = stoi(number);
+        }
+        
+        CalculateBottomUp(problems, numberOfProblems, denominations, 
+            numberOfCoinDenominations);
+    }
 	return 0; 
 
 }
