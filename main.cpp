@@ -26,6 +26,7 @@ class CoinSolution{
         void InitCoinTypes(int numberOfTypes) {
             coinTypes = new int[numberOfTypes];
             fill_n(coinTypes, numberOfTypes, 0);
+            this->numberOfTypes = numberOfTypes;
         }
         
         void printCoinSolution(int denominationValues[]) {
@@ -76,9 +77,12 @@ int main(int argc, char** argv) {
 			numberOfProblems - 1);
 
 		CoinSolution *solvedProblems = new CoinSolution[maxCoinProblem];
-
+        
+        auto startTime = Clock::now();
         CalculateBottomUp(problems, numberOfProblems, denominations, 
             numberOfCoinDenominations);
+        auto endTime = Clock::now();
+        unsigned long int duration = chrono::duration_cast<chrono::nanoseconds>(endTime - startTime).count();
 		solvedProblems[0].InitCoinTypes(numberOfCoinDenominations);
 		for (int i = 0; i < numberOfProblems; i++) {
 			CoinSolution result = calculateMemo(problems[i], solvedProblems, denominations, numberOfCoinDenominations);
@@ -96,6 +100,9 @@ void CalculateBottomUp(int* coinProblems, int coinProblemsLength,
         coinProblemsLength - 1);
 
     CoinSolution *solvedProblems = new CoinSolution[maxCoinProblem];
+    for (int i = 0; i < maxCoinProblem; i++) {
+        solvedProblems[i].InitCoinTypes(coinDenominationsLength);
+    }
     solvedProblems[0].totalCoins = 0;
     // zero
     for(int i = 1; i < maxCoinProblem; i++) {
@@ -176,6 +183,6 @@ void copyArrayValues(int* from, int* to, int length) {
 void outputToCSV(int coinValue, long time, string algorithmType) {
     ofstream outputFile;
     outputFile.open("data.csv", ofstream::app);
-    outputFile << "Made change for " << coinValue << " in with " << algorithmType;
+    outputFile << algorithmType << "," << time << "," << coinValue << endl;
     outputFile.close();
 }
