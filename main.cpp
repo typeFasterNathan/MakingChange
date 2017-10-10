@@ -1,7 +1,7 @@
 #include <iostream>
 #include <algorithm>
 #include <fstream>
-#include <string.h>
+#include <string>
 
 using namespace std;
 
@@ -25,7 +25,7 @@ class CoinSolution{
             fill_n(coinTypes, numberOfTypes, 0);
         }
         
-        printCoinSolution(int [] denominationValues) {
+        void printCoinSolution(int denominationValues[]) {
             cout << value << " cents =";
             for(int i = 0; i < numberOfTypes; i++) {
                 if(coinTypes[i] < 0) {
@@ -54,14 +54,14 @@ int main(int argc, char** argv) {
         string number; 
         getline(infile, number);
         int numberOfCoinDenominations = stoi(number);
-        int denominations[numberOfCoinDenominations];
+        int *denominations = new int[numberOfCoinDenominations];
         for(int i = 0; i < numberOfCoinDenominations; i++) {
             getline(infile, number);
             denominations[i] = stoi(number);
         }   
         getline(infile, number);
         int numberOfProblems = stoi(number);
-        int problems[numberOfProblems];
+        int *problems= new int[numberOfProblems];
         for(int i = 0; i < numberOfProblems; i++) {
             getline(infile, number);
             problems[i] = stoi(number);
