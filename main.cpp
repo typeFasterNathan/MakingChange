@@ -1,7 +1,7 @@
 #include <iostream>
 #include <algorithm>
 #include <fstream>
-#include <string>
+#include <string.h>
 
 using namespace std;
 
@@ -39,22 +39,25 @@ class CoinSolution{
         int* coinTypes;
 	    int totalCoins;
         int value;
-}
+};
+
+void CalculateBottomUp(int *, int, int*, int);
+void copyArrayValues(int* from, int* to, int length);
 
 int main(int argc, char** argv) {
-    if(agc < 2) {
+    if(argc < 2) {
         cout << "Ya done messed up" << endl;
     }
-    string filename = new string(argv[1]);
+    string filename(argv[1]);
     ifstream infile(filename);
     if(infile.is_open()) {
         string number; 
         getline(infile, number);
         int numberOfCoinDenominations = stoi(number);
         int denominations[numberOfCoinDenominations];
-        for(int i = 0; i < numberOfCoinDenomintations; i++) {
+        for(int i = 0; i < numberOfCoinDenominations; i++) {
             getline(infile, number);
-            denominationsp[i] = stoi(number);
+            denominations[i] = stoi(number);
         }   
         getline(infile, number);
         int numberOfProblems = stoi(number);
@@ -71,13 +74,13 @@ int main(int argc, char** argv) {
 
 }
 
-int CalculateBottomUp(int[] coinProblems, int coinProblemsLength,
-    int[] coinDenominations, int coinDenominationsLength) {
+void CalculateBottomUp(int* coinProblems, int coinProblemsLength,
+    int* coinDenominations, int coinDenominationsLength) {
     
     int maxCoinProblem = *max_element(coinProblems, coinProblems + 
-        coinProblemLength - 1);
+        coinProblemsLength - 1);
 
-    CoinSolution solvedProblems[coinProblems[maxCoinProblem]];
+    CoinSolution *solvedProblems = new CoinSolution[coinProblems[maxCoinProblem]];
     solvedProblems[0].totalCoins = 0;
     // zero
     for(int i = 1; i < maxCoinProblem; i++) {
@@ -93,11 +96,14 @@ int CalculateBottomUp(int[] coinProblems, int coinProblemsLength,
             }
         }
         solvedProblems[i].totalCoins = optimalLast; 
-        copy(solvedProblems[i - coinDenominations[j]], 
-            solvedProblems[i - coinDenominations[j]] + coinDenominationsLength,
-            solvedProblems[i];
+        copyArrayValues(solvedProblems[i - coinDenominations[coinType]].coinTypes,
+            solvedProblems[i].coinTypes, coinDenominationsLength);
         solvedProblems[i].coinTypes[coinType]++;
     }
 }
 
-
+void copyArrayValues(int* from, int* to, int length) {
+    for(int i = 0; i < length; i++) {
+        to[i] = from[i];
+    }
+}
