@@ -32,7 +32,7 @@ class CoinSolution{
         void printCoinSolution(int denominationValues[]) {
             cout << value << " cents =";
             for(int i = 0; i < numberOfTypes; i++) {
-                if(coinTypes[i] < 0) {
+                if(coinTypes[i] > 0) {
                     cout << denominationValues[i] << ":" << coinTypes[i] << " ";
                 }
             }
@@ -46,7 +46,7 @@ class CoinSolution{
 };
 
 void CalculateBottomUp(int *, int, int*, int);
-void copyArrayValues(int* from, int* to, int length);
+int* copyArrayValues(int* from, int length);
 CoinSolution calculateMemo(int problem, CoinSolution * solved, int * coinDenominations,
 	int coinDenominationsLength);
 
@@ -56,7 +56,7 @@ int main(int argc, char** argv) {
         return 0;
     }
     string filename(argv[1]);
-    ifstream infile(argv[1], ifstream::in);
+    ifstream infile(filename);
     if(infile.is_open()) {
         string number; 
         getline(infile, number);
@@ -82,7 +82,7 @@ int main(int argc, char** argv) {
         CalculateBottomUp(problems, numberOfProblems, denominations, 
             numberOfCoinDenominations);
         auto endTime = Clock::now();
-        unsigned long int duration = chrono::duration_cast<chrono::nanoseconds>(endTime - startTime).count();
+        unsigned long int duration = (unsigned long int)chrono::duration_cast<chrono::nanoseconds>(endTime - startTime).count();
 		solvedProblems[0].InitCoinTypes(numberOfCoinDenominations);
 		for (int i = 0; i < numberOfProblems; i++) {
 			CoinSolution result = calculateMemo(problems[i], solvedProblems, denominations, numberOfCoinDenominations);
@@ -118,8 +118,8 @@ void CalculateBottomUp(int* coinProblems, int coinProblemsLength,
             }
         }
         solvedProblems[i].totalCoins = optimalLast; 
-        copyArrayValues(solvedProblems[i - coinDenominations[coinType]].coinTypes,
-            solvedProblems[i].coinTypes, coinDenominationsLength);
+        //copyArrayValues(solvedProblems[i - coinDenominations[coinType]].coinTypes,
+       //     solvedProblems[i].coinTypes, coinDenominationsLength);
         solvedProblems[i].coinTypes[coinType]++;
 		solvedProblems[i].value = i;
     }
@@ -127,12 +127,13 @@ void CalculateBottomUp(int* coinProblems, int coinProblemsLength,
 
 CoinSolution calculateMemo(int problem, CoinSolution * solved, int * coinDenominations,
 	int coinDenominationsLength) {
-	CoinSolution optimal;
-	CoinSolution temp;
+	CoinSolution optimal(coinDenominationsLength);
+	CoinSolution temp(coinDenominationsLength);
 	int coin;
 	optimal.totalCoins = numeric_limits<int>::max();
 	for (int i = 0; i < coinDenominationsLength; i++) {
-		if (solved[problem].value != problem && problem - coinDenominations[i] >= 0) {
+		if (solved[problem].value != problem && problem - coinDenominations[i] >= 0
+			&& problem != 0) {
 			temp = calculateMemo(problem - coinDenominations[i], solved, coinDenominations,
 				coinDenominationsLength);
 		}
@@ -140,7 +141,9 @@ CoinSolution calculateMemo(int problem, CoinSolution * solved, int * coinDenomin
 			return solved[problem];
 		}
 		if (temp.totalCoins < optimal.totalCoins) {
-			optimal = temp;
+			optimal.coinTypes = copyArrayValues(temp.coinTypes, coinDenominationsLength);
+			optimal.numberOfTypes = temp.numberOfTypes;
+			optimal.totalCoins = temp.totalCoins;
 			coin = i;
 		}
 	}
@@ -153,8 +156,8 @@ CoinSolution calculateMemo(int problem, CoinSolution * solved, int * coinDenomin
 
 CoinSolution calculateRecursion(int problem, int * coinDenominations,
 	int coinDenominationsLength) {
-	CoinSolution optimal;
-	CoinSolution temp;
+	CoinSolution optimal(coinDenominationsLength);
+	CoinSolution temp(coinDenominationsLength);
 	int coin;
 	optimal.totalCoins = numeric_limits<int>::max();
 	for (int i = 0; i < coinDenominationsLength; i++) {
@@ -163,21 +166,23 @@ CoinSolution calculateRecursion(int problem, int * coinDenominations,
 				coinDenominationsLength);
 		}
 		if (temp.totalCoins < optimal.totalCoins) {
-			optimal = temp;
+			optimal.coinTypes = copyArrayValues(temp.coinTypes, coinDenominationsLength);
+			optimal.numberOfTypes = temp.numberOfTypes;
+			optimal.totalCoins = temp.totalCoins;
 			coin = i;
 		}
-	}
 	optimal.value = problem;
 	optimal.totalCoins++;
 	optimal.coinTypes[coin]++;
 	return optimal;
 }
 
-void copyArrayValues(int* from, int* to, int length) {
-    to = new int[length];
+int* copyArrayValues(int* from, int length) {
+   int* to = new int[length];
     for(int i = 0; i < length; i++) {
         to[i] = from[i];
     }
+	return to;
 }
 
 void outputToCSV(int coinValue, long time, string algorithmType) {
