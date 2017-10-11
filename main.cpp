@@ -38,14 +38,16 @@ class CoinSolution{
             }
             cout << endl;
         }
-        
+                
         int numberOfTypes;
         int* coinTypes;
 	    int totalCoins;
         int value;
 };
 
-void CalculateBottomUp(int *, int, int*, int);
+
+void outputToCSV(int coinValue, long time, string algorithmType);
+CoinSolution* CalculateBottomUp(int *, int, int*, int);
 void copyArrayValues(int* from, int* to, int length);
 CoinSolution calculateMemo(int problem, CoinSolution * solved, int * coinDenominations,
 	int coinDenominationsLength);
@@ -79,21 +81,29 @@ int main(int argc, char** argv) {
 		CoinSolution *solvedProblems = new CoinSolution[maxCoinProblem];
         
         auto startTime = Clock::now();
-        CalculateBottomUp(problems, numberOfProblems, denominations, 
-            numberOfCoinDenominations);
+        CoinSolution* bottomUp = CalculateBottomUp(problems, numberOfProblems, denominations, numberOfCoinDenominations);
         auto endTime = Clock::now();
+        for(int i = 0; i < numberOfProblems; i++) {
+            bottomUp[i].printCoinSolution(denominations); 
+        }
+        
+        
         unsigned long int duration = chrono::duration_cast<chrono::nanoseconds>(endTime - startTime).count();
 		solvedProblems[0].InitCoinTypes(numberOfCoinDenominations);
 		for (int i = 0; i < numberOfProblems; i++) {
+            auto startTime = Clock::now();
 			CoinSolution result = calculateMemo(problems[i], solvedProblems, denominations, numberOfCoinDenominations);
-			result.printCoinSolution(denominations);
+            auto endTime = Clock::now();
+            unsigned long int duration = chrono::duration_cast<chrono::nanoseconds>(endTime - startTime).count();
+            outputToCSV(problems[i], duration, "memoization solution");
+            result.printCoinSolution(denominations);
 		}
     }
 	return 0; 
 
 }
 
-void CalculateBottomUp(int* coinProblems, int coinProblemsLength,
+CoinSolution* CalculateBottomUp(int* coinProblems, int coinProblemsLength,
     int* coinDenominations, int coinDenominationsLength) {
     
     int maxCoinProblem = *max_element(coinProblems, coinProblems + 
@@ -123,6 +133,7 @@ void CalculateBottomUp(int* coinProblems, int coinProblemsLength,
         solvedProblems[i].coinTypes[coinType]++;
 		solvedProblems[i].value = i;
     }
+    return solvedProblems;
 }
 
 CoinSolution calculateMemo(int problem, CoinSolution * solved, int * coinDenominations,
