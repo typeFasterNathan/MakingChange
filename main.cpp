@@ -45,11 +45,12 @@ class CoinSolution{
         int value;
 };
 
-void CalculateBottomUp(int *, int, int*, int);
+CoinSolution CalculateBottomUp(int, int*, int);
 int* copyArrayValues(int* from, int length);
 CoinSolution calculateMemo(int problem, CoinSolution * solved, int * coinDenominations,
 	int coinDenominationsLength);
-
+CoinSolution calculateRecursion(int problem, int * coinDenominations,
+	int coinDenominationsLength);
 int main(int argc, char** argv) {
     if(argc < 2) {
         cout << "Ya done messed up" << endl;
@@ -76,36 +77,42 @@ int main(int argc, char** argv) {
 		int maxCoinProblem = *max_element(problems, problems +
 			numberOfProblems - 1);
 
-		CoinSolution *solvedProblems = new CoinSolution[maxCoinProblem];
-        
-        auto startTime = Clock::now();
-        CalculateBottomUp(problems, numberOfProblems, denominations, 
-            numberOfCoinDenominations);
-        auto endTime = Clock::now();
-        unsigned long int duration = (unsigned long int)chrono::duration_cast<chrono::nanoseconds>(endTime - startTime).count();
+		CoinSolution *solvedProblems = new CoinSolution[maxCoinProblem+1];
+		for (int i = 0; i < numberOfProblems; i++) {
+			auto startTime = Clock::now();
+			CoinSolution result = CalculateBottomUp(problems[i], denominations,
+				numberOfCoinDenominations);
+			auto endTime = Clock::now();
+			unsigned long int duration = (unsigned long int)chrono::duration_cast<chrono::nanoseconds>(endTime - startTime).count();
+			result.printCoinSolution(denominations);
+		}
 		solvedProblems[0].InitCoinTypes(numberOfCoinDenominations);
 		for (int i = 0; i < numberOfProblems; i++) {
 			CoinSolution result = calculateMemo(problems[i], solvedProblems, denominations, numberOfCoinDenominations);
 			result.printCoinSolution(denominations);
+		}
+		for (int i = 0; i < numberOfProblems; i++) {
+			if (problems[i] <= 40) {
+				CoinSolution result = calculateRecursion(problems[i], denominations, numberOfCoinDenominations);
+				result.printCoinSolution(denominations);
+			}
 		}
     }
 	return 0; 
 
 }
 
-void CalculateBottomUp(int* coinProblems, int coinProblemsLength,
-    int* coinDenominations, int coinDenominationsLength) {
-    
-    int maxCoinProblem = *max_element(coinProblems, coinProblems + 
-        coinProblemsLength - 1);
+CoinSolution CalculateBottomUp(int problem, int* coinDenominations, 
+	int coinDenominationsLength) {
+ 
 
-    CoinSolution *solvedProblems = new CoinSolution[maxCoinProblem];
-    for (int i = 0; i < maxCoinProblem; i++) {
+    CoinSolution *solvedProblems = new CoinSolution[problem + 1];
+    for (int i = 0; i <= problem; i++) {
         solvedProblems[i].InitCoinTypes(coinDenominationsLength);
     }
     solvedProblems[0].totalCoins = 0;
     // zero
-    for(int i = 1; i < maxCoinProblem; i++) {
+    for(int i = 1; i <= problem; i++) {
         int optimalLast = numeric_limits<int>::max();
         int coinType;
         for(int j = 0; j < coinDenominationsLength; j++) {
@@ -118,15 +125,19 @@ void CalculateBottomUp(int* coinProblems, int coinProblemsLength,
             }
         }
         solvedProblems[i].totalCoins = optimalLast; 
-        //copyArrayValues(solvedProblems[i - coinDenominations[coinType]].coinTypes,
-       //     solvedProblems[i].coinTypes, coinDenominationsLength);
+		solvedProblems[i].coinTypes = copyArrayValues(
+			solvedProblems[i - coinDenominations[coinType]].coinTypes,
+			coinDenominationsLength);
+
         solvedProblems[i].coinTypes[coinType]++;
 		solvedProblems[i].value = i;
     }
+	return solvedProblems[problem];
 }
 
 CoinSolution calculateMemo(int problem, CoinSolution * solved, int * coinDenominations,
 	int coinDenominationsLength) {
+
 	CoinSolution optimal(coinDenominationsLength);
 	CoinSolution temp(coinDenominationsLength);
 	int coin;
@@ -157,7 +168,9 @@ CoinSolution calculateMemo(int problem, CoinSolution * solved, int * coinDenomin
 CoinSolution calculateRecursion(int problem, int * coinDenominations,
 	int coinDenominationsLength) {
 	CoinSolution optimal(coinDenominationsLength);
+	optimal.numberOfTypes = coinDenominationsLength;
 	CoinSolution temp(coinDenominationsLength);
+	temp.numberOfTypes = coinDenominationsLength;
 	int coin;
 	optimal.totalCoins = numeric_limits<int>::max();
 	for (int i = 0; i < coinDenominationsLength; i++) {
@@ -171,9 +184,12 @@ CoinSolution calculateRecursion(int problem, int * coinDenominations,
 			optimal.totalCoins = temp.totalCoins;
 			coin = i;
 		}
-	optimal.value = problem;
-	optimal.totalCoins++;
-	optimal.coinTypes[coin]++;
+	}
+	if (problem != 0) {
+		optimal.value = problem;
+		optimal.totalCoins++;
+		optimal.coinTypes[coin]++;
+	}
 	return optimal;
 }
 
