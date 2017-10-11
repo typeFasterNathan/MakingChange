@@ -8,6 +8,7 @@
 using namespace std;
 typedef chrono::high_resolution_clock Clock;
 
+// class to hold all relevant data for a solution to making change
 class CoinSolution{
     public:
         CoinSolution() {
@@ -129,6 +130,7 @@ int main(int argc, char** argv) {
 
 }
 
+// solve making change with the bottom up approach
 CoinSolution CalculateBottomUp(int problem, int* coinDenominations, 
 	int coinDenominationsLength) {
  
@@ -161,6 +163,7 @@ CoinSolution CalculateBottomUp(int problem, int* coinDenominations,
 	return solvedProblems[problem];
 }
 
+// solve making change with recursive w/ Memoziation 
 CoinSolution calculateMemo(int problem, CoinSolution * solved, int * coinDenominations,
 	int coinDenominationsLength) {
 
@@ -191,21 +194,27 @@ CoinSolution calculateMemo(int problem, CoinSolution * solved, int * coinDenomin
 	return optimal;
 }
 
+// solve making change with brute force recursion
 CoinSolution calculateRecursion(int problem, int * coinDenominations,
 	int coinDenominationsLength) {
-	CoinSolution optimal(coinDenominationsLength);
+
+	CoinSolution optimal(coinDenominationsLength); //setup
 	optimal.numberOfTypes = coinDenominationsLength;
 	CoinSolution temp(coinDenominationsLength);
 	temp.numberOfTypes = coinDenominationsLength;
 	int coin;
 	optimal.totalCoins = numeric_limits<int>::max();
+
+    // check each of the coin denominations to see which is better
 	for (int i = 0; i < coinDenominationsLength; i++) {
 		if (problem - coinDenominations[i] >= 0) {
-			temp = calculateRecursion(problem - coinDenominations[i], coinDenominations,
-				coinDenominationsLength);
-		}
+            // recursive call
+			temp = calculateRecursion(problem - coinDenominations[i], 
+                coinDenominations, coinDenominationsLength);
+		} 
 		if (temp.totalCoins < optimal.totalCoins) {
-			optimal.coinTypes = copyArrayValues(temp.coinTypes, coinDenominationsLength);
+			optimal.coinTypes = copyArrayValues(temp.coinTypes, 
+                            coinDenominationsLength);
 			optimal.numberOfTypes = temp.numberOfTypes;
 			optimal.totalCoins = temp.totalCoins;
 			coin = i;
@@ -219,6 +228,7 @@ CoinSolution calculateRecursion(int problem, int * coinDenominations,
 	return optimal;
 }
 
+// allocates a new array for the *to pointer and assigns it to the from values
 int* copyArrayValues(int* from, int length) {
    int* to = new int[length];
     for(int i = 0; i < length; i++) {
@@ -227,6 +237,7 @@ int* copyArrayValues(int* from, int length) {
 	return to;
 }
 
+// data logging function
 void outputToCSV(int coinValue, long time, string algorithmType) {
     ofstream outputFile;
     outputFile.open("data.csv", ofstream::app);
