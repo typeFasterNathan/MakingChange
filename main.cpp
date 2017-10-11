@@ -86,7 +86,7 @@ int main(int argc, char** argv) {
 		int maxCoinProblem = *max_element(problems, problems +
 			numberOfProblems - 1);
         
-        // buttom up solution
+        // bottom up solution
         cout << "Solving via bottom up solution ..." << endl;
 		CoinSolution *solvedProblems = new CoinSolution[maxCoinProblem+1];
 		for (int i = 0; i < numberOfProblems; i++) {
@@ -95,7 +95,7 @@ int main(int argc, char** argv) {
 				numberOfCoinDenominations);
 			auto endTime = Clock::now();
 			unsigned long int duration = (unsigned long int)chrono::duration_cast<chrono::nanoseconds>(endTime - startTime).count();
-		    outputToCSV(problems[i], duration, "buttom up");
+		    outputToCSV(problems[i], duration, "bottom up");
             result.printCoinSolution(denominations);
 		}
 
